@@ -56,7 +56,7 @@ export const useChatStore = create<ChatState>()(
       conversations: [],
       activeId: null,
       settings: defaultSettings,
-      sidebarOpen: true,
+      sidebarOpen: false,
       settingsOpen: false,
 
       createConversation: () => {

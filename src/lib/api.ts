@@ -351,8 +351,23 @@ export async function streamChat(
   } catch (err: any) {
     if (err.name === 'AbortError') {
       callbacks.onDone();
+    } else if (err.message === 'Failed to fetch' || err.message === 'Network request failed' || err.message === 'network error') {
+      const providerNames: Record<string, string> = {
+        openai: 'OpenAI', anthropic: 'Anthropic', groq: 'Groq',
+        ollama: 'Ollama', openrouter: 'OpenRouter',
+      };
+      const name = providerNames[provider] || 'AI provider';
+      if (provider === 'ollama') {
+        callbacks.onError(
+          `Cannot connect to Ollama at localhost:11434.\n\nMake sure Ollama is running:\n1. Open terminal\n2. Run: ollama serve\n3. Pull model: ollama pull ${model}\n\nIf using from phone, Ollama must run on your PC and both must be on same WiFi.`
+        );
+      } else {
+        callbacks.onError(
+          `Network error — cannot reach ${name}.\n\nPossible fixes:\n1. Check your internet connection\n2. Verify your API key is correct in Settings\n3. The API service might be temporarily down\n4. If using a VPN, try disabling it`
+        );
+      }
     } else {
-      callbacks.onError(err.message || 'Unknown error occurred');
+      callbacks.onError(err.message || 'Unknown error occurred. Please try again.');
     }
   }
 }
