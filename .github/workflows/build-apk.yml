@@ -32,12 +32,31 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create static-only next.config for APK build
+        run: |
+          cat > next.config.js << 'CONFIG'
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            reactStrictMode: true,
+            output: 'export',
+            images: { unoptimized: true },
+            assetPrefix: './',
+          };
+          module.exports = nextConfig;
+          CONFIG
+
+      - name: Remove API routes (not compatible with static export)
+        run: rm -rf src/app/api
+
       - name: Build Next.js static export
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 
-      - name: Install Capacitor CLI
+      - name: Verify out directory
+        run: ls -la out/
+
+      - name: Install Capacitor
         run: npm install @capacitor/cli @capacitor/core @capacitor/android
 
       - name: Add Android platform

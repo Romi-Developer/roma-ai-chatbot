@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Provider } from '@/types';
 
-// Mark as dynamic — this route uses searchParams
-export const dynamic = 'force-dynamic';
-
 // Returns available models for a given provider
 export async function GET(req: NextRequest) {
   const provider = req.nextUrl.searchParams.get('provider') as Provider;

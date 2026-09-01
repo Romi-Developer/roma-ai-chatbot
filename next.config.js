@@ -1,13 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Static export for Capacitor (Android APK)
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  // Asset prefix for Capacitor — serves from local files
-  assetPrefix: './',
+  // Note: For APK build, GitHub Actions workflow creates a temporary
+  // static export config. This config is for web/development mode.
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

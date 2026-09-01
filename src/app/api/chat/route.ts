@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Provider } from '@/types';
 
-// Mark as dynamic — API routes can't be statically exported
-export const dynamic = 'force-dynamic';
-
 // ── Types ─────────────────────────────────────────────────────────
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
