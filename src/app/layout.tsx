@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `
           try {
             var saved = JSON.parse(localStorage.getItem('roma-theme') || '{}');
-            var theme = saved.state?.theme || 'dark';
+            var theme = saved.state?.theme || 'system';
             var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             document.documentElement.classList.toggle('dark', isDark);
             document.documentElement.classList.toggle('light', !isDark);
