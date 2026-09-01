@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Square, Paperclip, Mic } from 'lucide-react';
+import { Send, Square, Paperclip } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
@@ -64,14 +64,6 @@ export default function ChatInput({ onSend, onStop, isLoading, disabled }: ChatI
             className="flex-1 resize-none bg-transparent py-3 text-[0.9375rem] text-text-primary placeholder:text-text-tertiary focus:outline-none"
             style={{ maxHeight: '200px' }}
           />
-
-          <button
-            className="mb-2.5 mr-2.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-text-tertiary transition-colors hover:bg-bg-tertiary hover:text-text-secondary"
-            title="Voice (coming soon)"
-            disabled
-          >
-            <Mic className="h-4 w-4" />
-          </button>
 
           {isLoading ? (
             <button

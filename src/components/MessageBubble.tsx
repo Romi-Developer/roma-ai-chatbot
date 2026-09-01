@@ -25,18 +25,8 @@ export default function MessageBubble({ message, onRegenerate, isLast }: Message
   };
 
   return (
-    <div
-      className={cn(
-        'group w-full animate-fade-in',
-        isUser ? 'flex justify-end' : 'flex justify-start'
-      )}
-    >
-      <div
-        className={cn(
-          'flex max-w-[85%] gap-3',
-          isUser ? 'flex-row-reverse' : 'flex-row'
-        )}
-      >
+    <div className={cn('group w-full animate-fade-in', isUser ? 'flex justify-end' : 'flex justify-start')}>
+      <div className={cn('flex max-w-[85%] gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}>
         {/* Avatar */}
         <div
           className={cn(
@@ -48,22 +38,13 @@ export default function MessageBubble({ message, onRegenerate, isLast }: Message
                 : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500'
           )}
         >
-          {isUser ? (
-            <User className="h-4 w-4 text-white" />
-          ) : message.error ? (
-            <AlertCircle className="h-4 w-4 text-white" />
-          ) : (
-            <Bot className="h-4 w-4 text-white" />
-          )}
+          {isUser ? <User className="h-4 w-4 text-white" /> :
+           message.error ? <AlertCircle className="h-4 w-4 text-white" /> :
+           <Bot className="h-4 w-4 text-white" />}
         </div>
 
         {/* Content */}
-        <div
-          className={cn(
-            'flex flex-col gap-1',
-            isUser ? 'items-end' : 'items-start'
-          )}
-        >
+        <div className={cn('flex flex-col gap-1', isUser ? 'items-end' : 'items-start')}>
           <div
             className={cn(
               'rounded-2xl px-4 py-3',
@@ -75,9 +56,7 @@ export default function MessageBubble({ message, onRegenerate, isLast }: Message
             )}
           >
             {isUser ? (
-              <p className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed">
-                {message.content}
-              </p>
+              <p className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed">{message.content}</p>
             ) : message.pending && !message.content ? (
               <div className="flex items-center gap-1 py-1">
                 <span className="typing-dot"></span>
@@ -111,28 +90,16 @@ export default function MessageBubble({ message, onRegenerate, isLast }: Message
           {/* Actions */}
           {!message.pending && !message.error && (
             <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary"
-              >
-                {copied ? (
-                  <Check className="h-3 w-3 text-green-400" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
+              <button onClick={handleCopy} className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary">
+                {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
               </button>
               {!isUser && onRegenerate && isLast && (
-                <button
-                  onClick={onRegenerate}
-                  className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary"
-                >
+                <button onClick={onRegenerate} className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary">
                   <RefreshCw className="h-3 w-3" />
                 </button>
               )}
               {!isUser && message.model && (
-                <span className="text-xs text-text-tertiary">
-                  {message.model}
-                </span>
+                <span className="text-xs text-text-tertiary">{message.model}</span>
               )}
             </div>
           )}

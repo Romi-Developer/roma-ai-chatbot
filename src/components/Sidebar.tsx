@@ -2,33 +2,22 @@
 
 import { useState } from 'react';
 import {
-  Plus,
-  MessageSquare,
-  Trash2,
-  Settings as SettingsIcon,
-  PanelLeftClose,
-  PanelLeft,
-  Pencil,
-  Check,
-  X,
-  Sparkles,
+  Plus, MessageSquare, Trash2, Settings as SettingsIcon,
+  PanelLeftClose, PanelLeft, Pencil, Check, X, Sparkles, Info, Send,
 } from 'lucide-react';
 import { useChatStore } from '@/stores/chatStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { cn, formatTime, truncate } from '@/lib/utils';
 
-export default function Sidebar() {
+interface SidebarProps {
+  onOpenAbout: () => void;
+}
+
+export default function Sidebar({ onOpenAbout }: SidebarProps) {
   const {
-    conversations,
-    activeId,
-    sidebarOpen,
-    settingsOpen,
-    createConversation,
-    deleteConversation,
-    setActiveConversation,
-    renameConversation,
-    toggleSidebar,
-    toggleSettings,
-    settings,
+    conversations, activeId, sidebarOpen, settingsOpen,
+    createConversation, deleteConversation, setActiveConversation,
+    renameConversation, toggleSidebar, toggleSettings, settings,
   } = useChatStore();
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -49,12 +38,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
-          onClick={toggleSidebar}
-        />
+        <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden" onClick={toggleSidebar} />
       )}
 
       <aside
@@ -93,7 +78,7 @@ export default function Sidebar() {
               </button>
             </div>
 
-            {/* Conversations list */}
+            {/* Conversations */}
             <div className="flex-1 overflow-y-auto px-2 py-2">
               {conversations.length === 0 && (
                 <div className="px-3 py-8 text-center">
@@ -108,9 +93,7 @@ export default function Sidebar() {
                     key={conv.id}
                     className={cn(
                       'group relative flex items-center gap-2 rounded-lg px-3 py-2 transition-all',
-                      activeId === conv.id
-                        ? 'bg-bg-tertiary'
-                        : 'hover:bg-bg-tertiary/50'
+                      activeId === conv.id ? 'bg-bg-tertiary' : 'hover:bg-bg-tertiary/50'
                     )}
                   >
                     {editingId === conv.id ? (
@@ -125,66 +108,31 @@ export default function Sidebar() {
                           autoFocus
                           className="flex-1 rounded border border-accent bg-bg-primary px-2 py-1 text-xs text-text-primary focus:outline-none"
                         />
-                        <button
-                          onClick={handleConfirmRename}
-                          className="text-green-400 hover:text-green-300"
-                        >
+                        <button onClick={handleConfirmRename} className="text-green-400 hover:text-green-300">
                           <Check className="h-3.5 w-3.5" />
                         </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-red-400 hover:text-red-300"
-                        >
+                        <button onClick={() => setEditingId(null)} className="text-red-400 hover:text-red-300">
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <button
-                          onClick={() => setActiveConversation(conv.id)}
-                          className="flex flex-1 items-center gap-2 overflow-hidden"
-                        >
-                          <MessageSquare
-                            className={cn(
-                              'h-4 w-4 flex-shrink-0',
-                              activeId === conv.id ? 'text-accent' : 'text-text-tertiary'
-                            )}
-                          />
+                        <button onClick={() => setActiveConversation(conv.id)} className="flex flex-1 items-center gap-2 overflow-hidden">
+                          <MessageSquare className={cn('h-4 w-4 flex-shrink-0', activeId === conv.id ? 'text-accent' : 'text-text-tertiary')} />
                           <div className="flex min-w-0 flex-1 flex-col">
-                            <span
-                              className={cn(
-                                'truncate text-sm',
-                                activeId === conv.id
-                                  ? 'font-medium text-text-primary'
-                                  : 'text-text-secondary'
-                              )}
-                            >
+                            <span className={cn('truncate text-sm', activeId === conv.id ? 'font-medium text-text-primary' : 'text-text-secondary')}>
                               {truncate(conv.title, 28)}
                             </span>
                             <span className="text-xs text-text-tertiary">
-                              {conv.messages.length > 0
-                                ? `${conv.messages.length} msgs · ${formatTime(conv.updatedAt)}`
-                                : formatTime(conv.createdAt)}
+                              {conv.messages.length > 0 ? `${conv.messages.length} msgs · ${formatTime(conv.updatedAt)}` : formatTime(conv.createdAt)}
                             </span>
                           </div>
                         </button>
                         <div className="flex flex-shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStartRename(conv.id, conv.title);
-                            }}
-                            className="rounded p-1 text-text-tertiary hover:text-text-primary"
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); handleStartRename(conv.id, conv.title); }} className="rounded p-1 text-text-tertiary hover:text-text-primary">
                             <Pencil className="h-3 w-3" />
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteConversation(conv.id);
-                            }}
-                            className="rounded p-1 text-text-tertiary hover:text-red-400"
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }} className="rounded p-1 text-text-tertiary hover:text-red-400">
                             <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
@@ -196,28 +144,50 @@ export default function Sidebar() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-border p-3">
+            <div className="border-t border-border p-3 space-y-1">
+              {/* About */}
+              <button
+                onClick={onOpenAbout}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary"
+              >
+                <Info className="h-4 w-4" />
+                About
+              </button>
+
+              {/* Telegram */}
+              <a
+                href="https://t.me/romio_modz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary"
+              >
+                <Send className="h-4 w-4 text-[#229ED9]" />
+                Join Our Telegram
+              </a>
+
+              {/* Settings */}
               <button
                 onClick={toggleSettings}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
-                  settingsOpen
-                    ? 'bg-bg-tertiary text-text-primary'
-                    : 'text-text-secondary hover:bg-bg-tertiary'
+                  settingsOpen ? 'bg-bg-tertiary text-text-primary' : 'text-text-secondary hover:bg-bg-tertiary'
                 )}
               >
                 <SettingsIcon className="h-4 w-4" />
                 Settings
-                <span className="ml-auto text-xs text-text-tertiary">
-                  {settings.provider}
-                </span>
+                <span className="ml-auto text-xs text-text-tertiary">{settings.provider}</span>
               </button>
+
+              {/* Developer credits */}
+              <div className="px-3 py-2 text-center">
+                <p className="text-[10px] font-medium text-text-tertiary">Developed By The Romio Shaikh</p>
+                <p className="text-[9px] text-text-tertiary">Developer Partner: Manik Developer</p>
+              </div>
             </div>
           </div>
         )}
       </aside>
 
-      {/* Open sidebar button (when closed) */}
       {!sidebarOpen && (
         <button
           onClick={toggleSidebar}

@@ -77,7 +77,7 @@ export default function CodeBlock({ language, value }: CodeBlockProps) {
   const highlighted = highlightCode(value, lang);
 
   return (
-    <div className="my-3 overflow-hidden rounded-lg border border-border bg-[#0d0d0f]">
+    <div className="my-3 overflow-hidden rounded-lg border border-border bg-bg-tertiary">
       <div className="flex items-center justify-between border-b border-border bg-bg-tertiary px-4 py-2">
         <span className="text-xs font-medium text-text-secondary">
           {lang}
