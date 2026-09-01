@@ -1,6 +1,6 @@
 // ── Types ─────────────────────────────────────────────────────────
 
-export type Provider = 'openai' | 'anthropic' | 'groq' | 'ollama' | 'openrouter';
+export type Provider = 'openai' | 'anthropic' | 'groq' | 'ollama' | 'openrouter' | 'gemini' | 'deepseek' | 'mistral';
 
 export interface ModelOption {
   id: string;

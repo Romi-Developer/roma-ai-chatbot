@@ -9,6 +9,9 @@ const PROVIDER_URLS: Record<Provider, string> = {
   groq: 'https://api.groq.com/openai/v1/chat/completions',
   ollama: 'http://localhost:11434/api/chat',
   openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+  deepseek: 'https://api.deepseek.com/chat/completions',
+  mistral: 'https://api.mistral.ai/v1/chat/completions',
 };
 
 interface ChatMessage {
@@ -297,6 +300,9 @@ export async function streamChat(
       anthropic: 'Anthropic',
       groq: 'Groq',
       openrouter: 'OpenRouter',
+      gemini: 'Google Gemini',
+      deepseek: 'DeepSeek',
+      mistral: 'Mistral AI',
     };
     callbacks.onError(
       `No API key for ${names[provider]}. Open Settings (gear icon) → enter your API key. Get a free key from the link in Settings.`
@@ -309,6 +315,9 @@ export async function streamChat(
       case 'openai':
       case 'groq':
       case 'openrouter':
+      case 'gemini':
+      case 'deepseek':
+      case 'mistral':
         await streamOpenAICompatible(
           PROVIDER_URLS[provider],
           apiKey,
@@ -355,6 +364,7 @@ export async function streamChat(
       const providerNames: Record<string, string> = {
         openai: 'OpenAI', anthropic: 'Anthropic', groq: 'Groq',
         ollama: 'Ollama', openrouter: 'OpenRouter',
+        gemini: 'Google Gemini', deepseek: 'DeepSeek', mistral: 'Mistral AI',
       };
       const name = providerNames[provider] || 'AI provider';
       if (provider === 'ollama') {

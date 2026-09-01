@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, Zap, Code2, BookOpen, Wand2, Info } from 'lucide-react';
+import { Sparkles, Zap, Code2, BookOpen, Wand2, Info, ChevronDown, Menu, X } from 'lucide-react';
 import { useChatStore } from '@/stores/chatStore';
 import { generateId } from '@/lib/utils';
 import { getProvider } from '@/lib/providers';
 import { streamChat } from '@/lib/api';
+import type { AttachedFile } from './ChatInput';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 
@@ -27,6 +28,7 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
   } = useChatStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -39,15 +41,27 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
     }
   }, [messages]);
 
-  const sendMessage = useCallback(async (text: string, regenerate = false) => {
+  const sendMessage = useCallback(async (text: string, files?: AttachedFile[], regenerate = false) => {
     let convId = activeId;
     if (!convId) {
       convId = createConversation();
     }
 
+    // Build user message content (include file content if any)
+    let userContent = text;
+    if (files && files.length > 0) {
+      const fileDescriptions = files.map(f => {
+        if (f.content) {
+          return `\n\n[File: ${f.name}]\n${f.content}`;
+        }
+        return `\n\n[Attached file: ${f.name} (${f.type}, ${f.size} bytes)]`;
+      });
+      userContent += fileDescriptions.join('');
+    }
+
     if (!regenerate) {
       addMessage(convId, {
-        id: generateId(), role: 'user', content: text, createdAt: Date.now(),
+        id: generateId(), role: 'user', content: userContent, createdAt: Date.now(),
       });
     }
 
@@ -59,7 +73,6 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
 
     setIsLoading(true);
 
-    // Build messages — read fresh state
     const conv = useChatStore.getState().conversations.find((c) => c.id === convId);
     const apiMessages = [
       { role: 'system' as const, content: settings.systemPrompt },
@@ -120,7 +133,7 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
         ),
       }));
     }
-    sendMessage(lastUser.content, true);
+    sendMessage(lastUser.content, undefined, true);
   };
 
   const showWelcome = messages.length === 0;
@@ -136,13 +149,59 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
           <span className="text-xs text-text-tertiary">·</span>
           <span className="text-xs text-text-tertiary">{settings.model}</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={onOpenAbout} className="text-xs text-text-tertiary transition-colors hover:text-accent flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          {/* Suggestion menu button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-1 rounded-lg border border-border bg-bg-tertiary px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+            >
+              <Menu className="h-3.5 w-3.5" />
+              Options
+              <ChevronDown className={`h-3 w-3 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-border bg-bg-secondary shadow-xl animate-slide-up">
+                  <div className="p-2">
+                    <div className="px-3 py-2 text-xs font-semibold text-text-tertiary uppercase tracking-wide">Quick Actions</div>
+                    {SUGGESTIONS.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          sendMessage(s.prompt);
+                          setShowMenu(false);
+                        }}
+                        className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-bg-tertiary"
+                      >
+                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                          <s.icon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-text-primary">{s.title}</span>
+                          <span className="text-xs text-text-tertiary line-clamp-2">{s.prompt}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          {/* About button */}
+          <button
+            onClick={onOpenAbout}
+            className="flex items-center gap-1 rounded-lg border border-border bg-bg-tertiary px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+          >
             <Info className="h-3.5 w-3.5" />
             About
           </button>
           {messages.length > 0 && (
-            <button onClick={() => activeId && clearMessages(activeId)} className="text-xs text-text-tertiary transition-colors hover:text-red-400">
+            <button
+              onClick={() => activeId && clearMessages(activeId)}
+              className="rounded-lg border border-border bg-bg-tertiary px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-red-400 hover:bg-bg-hover"
+            >
               Clear
             </button>
           )}
@@ -152,7 +211,7 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
         {showWelcome ? (
-          <WelcomeScreen onSuggestion={(p) => sendMessage(p)} />
+          <WelcomeScreen />
         ) : (
           <div className="mx-auto flex max-w-3xl flex-col gap-6">
             {messages.map((msg, i) => (
@@ -168,31 +227,15 @@ export default function ChatInterface({ onOpenAbout }: ChatInterfaceProps) {
   );
 }
 
-function WelcomeScreen({ onSuggestion }: { onSuggestion: (prompt: string) => void }) {
+function WelcomeScreen() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-4">
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 glow-strong">
         <Sparkles className="h-8 w-8 text-white" />
       </div>
       <h1 className="mb-2 text-3xl font-bold gradient-text">RoMa Ai</h1>
-      <p className="mb-8 text-sm text-text-secondary">Your premium AI assistant — powered by multiple providers</p>
-
-      <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
-        {SUGGESTIONS.map((s, i) => (
-          <button
-            key={i}
-            onClick={() => onSuggestion(s.prompt)}
-            className="group flex flex-col items-start rounded-xl border border-border bg-bg-secondary p-4 text-left transition-all hover:border-accent/40 hover:bg-bg-tertiary animate-slide-up"
-            style={{ animationDelay: `${i * 0.05}s` }}
-          >
-            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-bg-tertiary text-accent transition-colors group-hover:bg-accent/10">
-              <s.icon className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-medium text-text-primary">{s.title}</span>
-            <span className="mt-1 text-xs text-text-tertiary line-clamp-2">{s.prompt}</span>
-          </button>
-        ))}
-      </div>
+      <p className="mb-2 text-sm text-text-secondary">Your premium AI assistant — powered by multiple providers</p>
+      <p className="text-xs text-text-tertiary">Tap "Options" in the top right for quick actions, or start typing below.</p>
     </div>
   );
 }
